@@ -30,8 +30,8 @@ Dans ce travail de laboratoire, vous allez configurer des routeurs Cisco émulé
 -	Capture Sniffer avec filtres précis sur la communication à épier
 -	Activation du mode « debug » pour certaines fonctions du routeur
 -	Observation des protocoles IPSec
- 
- 
+
+
 ## Matériel
 
 Le logiciel d'émulation à utiliser c'est eve-ng (vous l'avez déjà employé). Vous trouverez ici un [guide très condensé](files/Manuel_EVE-NG.pdf) pour l'utilisation et l'installation de eve-ng.
@@ -106,7 +106,7 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 
 ---
 
-**Réponse :**  
+**Réponse :**  Non aucun problème.
 
 ---
 
@@ -143,7 +143,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-**Réponse :**  
+**Réponse :**  Oui tous les pings sont passés.
 
 ---
 
@@ -166,7 +166,13 @@ Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur
 
 ---
 
-**Screenshots :**  
+**Screenshots :** 
+
+![image-20210520162218655](figures/image-20210520162218655.png) 
+
+![image-20210520160256202](figures/image-20210520160256202.png)
+
+![image-20210520160323632](figures/image-20210520160323632.png)
 
 ---
 
@@ -237,16 +243,29 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 ---
 
-**Réponse :**  
+**Réponse :**  Sur R1 et R2, la commande résume la configuration des policies, on peut observer que les configurations correspondent bien aux options que l'on a choisies plus haut :
+
+![image-20210520171153370](figures/image-20210520171153370.png)
+
+![image-20210520162618608](figures/image-20210520162618608.png)
+
+Une policy supplémentaire a été ajoutée à R2 utilisant l'algorithme de chiffrement TripleDES avec une priorité plus élevée (`priority 10`). Cependant, comme la seule policy mise en place sur R1 utilise l'algorithme de chiffrement AES, c'est celle qui sera utilisée pour configurer IKE.
+
+De plus, la policy de priorité 10 sur R2 utilise un l'algorithme de hachage MD5 qui n'est pas forcément recommandé de nos jours. Il est également recommandé d'utiliser des tailles de clés plus grandes pour Diffie-Hellman (2048 bits minimum).
 
 ---
-
 
 **Question 5: Utilisez la commande `show crypto isakmp key` et faites part de vos remarques :**
 
 ---
 
 **Réponse :**  
+
+Cette commande permet d'afficher les clés pré-partagées, ici sur R1 et R2 :
+
+![image-20210520164043613](figures/image-20210520164043613.png)
+
+![image-20210520164058713](figures/image-20210520164058713.png)
 
 ---
 
@@ -340,6 +359,30 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 ---
 
 **Réponse :**  
+
+La configuration suivante a été mise en place sur R1 :
+
+![image-20210520173106448](figures/image-20210520173106448.png)
+
+La configuration suivante a été mise en place sur R2 :
+
+![image-20210520173026435](figures/image-20210520173026435.png)
+
+Lors de la configuration, deux warnings sont apparus indiquant que les valeurs que nous avons choisies sont plus petites que celles qui étaient recommandées pour les lifetimes values : 
+
+![image-20210520171758043](figures/image-20210520171758043.png)
+
+Pour tester notre configuration, nous avons ensuite lancer un ping depuis la machine VPC et avons obtenu ce résultat qui confirme sont fonctionnement :
+
+![image-20210520172309267](figures/image-20210520172309267.png)
+
+![image-20210520172347188](figures/image-20210520172347188.png)
+
+![image-20210520172507989](figures/image-20210520172507989.png)
+
+![image-20210520172819137](figures/image-20210520172819137.png)
+
+On peut observer que les paquets ICMP ont été remplacés par des paquets ESP, ce qui montre que IPSec a correctement été mis en place et que les paquets ont été chiffrés.
 
 ---
 
