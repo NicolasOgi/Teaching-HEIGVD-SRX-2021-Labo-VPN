@@ -194,14 +194,14 @@ Nous allons établir un VPN IKE/IPsec entre le réseau de votre « loopback 1 »
 
 Sur le routeur R1 nous activons un « proposal » IKE. Il s’agit de la configuration utilisée pour la phase 1 du protocole IKE. Le « proposal » utilise les éléments suivants :
 
-| Element          | Value                                                                                                        |
-|------------------|----------------------------------------------------------------------------------------------------------------------|
-| Encryption       | AES 256 bits    
-| Signature        | Basée sur SHA-1                                                                                                      |
-| Authentification | Preshared Key                                                                                                        |
-| Diffie-Hellman   | avec des nombres premiers sur 1536 bits                                                                              |
-| Renouvellement   | des SA de la Phase I toutes les 30 minutes                                                                           |
-| Keepalive        | toutes les 30 secondes avec 3 « retry »                                                                              |
+| Element          | Value                                                        |
+| ---------------- | ------------------------------------------------------------ |
+| Encryption       | AES 256 bits                                                 |
+| Signature        | Basée sur SHA-1                                              |
+| Authentification | Preshared Key                                                |
+| Diffie-Hellman   | avec des nombres premiers sur 1536 bits                      |
+| Renouvellement   | des SA de la Phase I toutes les 30 minutes                   |
+| Keepalive        | toutes les 30 secondes avec 3 « retry »                      |
 | Preshared-Key    | pour l’IP du distant avec le texte « cisco-1 », Notez que dans la réalité nous utiliserions un texte plus compliqué. |
 
 
@@ -392,6 +392,21 @@ On peut observer que les paquets ICMP ont été remplacés par des paquets ESP, 
 
 **Réponse :**  
 
+Dans cet exercice, IKE et IPSec utilisent chacun 2 timers :
+
+- IKE :
+
+  - *lifetime* : Définit le renouvellement des SA de la phase 1 toutes les 30 minutes 
+
+  - *keepalive* : Permet de supprimer les SA si aucun paquet n'est transmis entre les pairs dans un intervalle de 30 sec configuré à 3 essais 
+
+    
+
+- IPSec :
+
+  - *lifetime* : Permet de changer les SA toutes les 5 minutes ou après 2.6MB de données qui ont transités
+  - *idle-time* : Permet de supprimer les SA après 15 minutes d'inactivité
+
 ---
 
 
@@ -406,6 +421,9 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 **Réponse :**  
 
+- IKE : Pour l'échange de clés
+- ESP : Pour l'encapsulation et le chiffrement des données
+
 ---
 
 
@@ -413,25 +431,30 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+**Réponse :**  C'est le mode tunnel qui a été configuré sur R2 au moment de configuré IPSec : 
+
+```crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac mode tunnel
+crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac 
+	mode tunnel
+```
+
+Nous avons aussi pu constater avec Wireshark que l'en-tête IP a été modifiée, ce qui prouve qu'il s'agit bien d'un mode tunnel.
 
 ---
-
 
 **Question 10: Expliquez quelles sont les parties du paquet qui sont chiffrées. Donnez l’algorithme cryptographique correspondant.**
 
 ---
 
-**Réponse :**  
+**Réponse :**  Toutes les parties qu'englobe l'en-tête IPSec avec le mode Tunnel, c'est-à-dire l'en-tête IP, l'en-tête TCP et les données. L'algorithme de chiffrement utilisé est AES-192.
 
 ---
-
 
 **Question 11: Expliquez quelles sont les parties du paquet qui sont authentifiées. Donnez l’algorithme cryptographique correspondant.**
 
 ---
 
-**Réponse :**  
+**Réponse :**  Comme évoqué précédemment, avec le mode Tunnel, le paquet initial sera authentifié en plus d'être chiffré. L'en-tête ESP sera également authentifié. L'algorithme d'authentification mis en place est HMAC-SHA1.
 
 ---
 
@@ -440,6 +463,6 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+**Réponse :**  Toutes les parties authentifiées seront également protégées en intégrité. La seule partie qui ne bénéficie pas de cette protection est la nouvelle en-tête IP. C'est aussi l'algorithme cryptographique HMAC-SHA1 qui s'occupe d'assurer l'intégrité en effectuant l'ICV (Integrity Check Value).
 
 ---
