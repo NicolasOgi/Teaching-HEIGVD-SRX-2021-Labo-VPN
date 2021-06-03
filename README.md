@@ -166,13 +166,21 @@ Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur
 
 ---
 
-**Screenshots :** 
+**Screenshots :**
 
-![image-20210520162218655](figures/image-20210520162218655.png) 
+Envois des pings depuis la machine VPC :
+
+![image-20210520162218655](figures/image-20210520162218655.png)
+
+Réponses de R1 : 
 
 ![image-20210520160256202](figures/image-20210520160256202.png)
 
+Pings qui transitent par R2 :
+
 ![image-20210520160323632](figures/image-20210520160323632.png)
+
+Ces captures montrent donc que la communication fonctionne.
 
 ---
 
@@ -266,6 +274,8 @@ Cette commande permet d'afficher les clés pré-partagées, ici sur R1 et R2 :
 ![image-20210520164043613](figures/image-20210520164043613.png)
 
 ![image-20210520164058713](figures/image-20210520164058713.png)
+
+On peut remarquer que sur chaque routeur, on voit s'afficher l'IP de l'autre routeur. On voit donc aussi que la clé pré-partagée par défaut est configurée sur les deux routeurs, elle permet d'avoir un secret partagé (en plus du secret partagé avec D-H) entre les deux routeurs afin de vérifier l'authenticité entre ces derniers. La colonne *Hostname/Address* permet de dire que tout paquet ayant comme destination l'adresse indiquée, doit être chiffré avec la clé.
 
 ---
 
@@ -372,7 +382,7 @@ Lors de la configuration, deux warnings sont apparus indiquant que les valeurs q
 
 ![image-20210520171758043](figures/image-20210520171758043.png)
 
-Pour tester notre configuration, nous avons ensuite lancer un ping depuis la machine VPC et avons obtenu ce résultat qui confirme sont fonctionnement :
+Pour tester notre configuration, nous avons ensuite lancé un ping depuis la machine VPC et avons obtenu ce résultat qui confirme son fonctionnement :
 
 ![image-20210520172309267](figures/image-20210520172309267.png)
 
@@ -406,6 +416,10 @@ Dans cet exercice, IKE et IPSec utilisent chacun 2 timers :
 
   - *lifetime* : Permet de changer les SA toutes les 5 minutes ou après 2.6MB de données qui ont transités
   - *idle-time* : Permet de supprimer les SA après 15 minutes d'inactivité
+  
+  
+
+Etant donné l'utilisation du "lifetime" dans la création de "security associations", cela permet de limiter la réutilisation de cette valeur pour l'échange de clés. En effet, réutiliser un paramètre en cryptographie est souvent une mauvaise idée.
 
 ---
 
@@ -420,6 +434,8 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 ---
 
 **Réponse :**  
+
+Selon les commandes que nous avons tapées ainsi que les captures faites plus haut, il est possible de déduire que ces deux protocoles ont été utilisés :
 
 - IKE : Pour l'échange de clés
 - ESP : Pour l'encapsulation et le chiffrement des données
@@ -455,6 +471,8 @@ Nous avons aussi pu constater avec Wireshark que l'en-tête IP a été modifiée
 ---
 
 **Réponse :**  Comme évoqué précédemment, avec le mode Tunnel, le paquet initial sera authentifié en plus d'être chiffré. L'en-tête ESP sera également authentifié. L'algorithme d'authentification mis en place est HMAC-SHA1.
+
+![image-20210603151257403](figures/image-20210603151257403.png)
 
 ---
 
